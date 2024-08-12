@@ -20,7 +20,7 @@
  *
  *  3. This notice may not be removed or altered from any source distribution.
  */
-#include <alloca.h>
+// #include <alloca.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,7 +52,29 @@ static _Bool string_equals(struct xml_string* a, char const* b) {
 	size_t a_length = xml_string_length(a);
 	size_t b_length = strlen(b);
 
-	uint8_t* a_buffer = alloca((a_length + 1) * sizeof(uint8_t));
+	// uint8_t* a_buffer = alloca((a_length + 1) * sizeof(uint8_t));
+	// In some setups (as mine with mingw for windows and w64devkit) the
+	// `alloca.h` header is completely missing but completely pointless at the same
+	// time. According to the manpage for alloca(3):
+	// "By necessity, alloca() is a compiler built-in, also known as
+        // __builtin_alloca().  By default, modern compilers automatically
+        // translate all uses of alloca() into the built-in, but this is
+        // forbidden if standards conformance is requested (-ansi, -std=c*),
+        //  in which case <alloca.h> is required, lest a symbol dependency be
+        // emitted."
+        //
+        // Then, making sense out of that fact... alloca(3) it's the exact same thing
+        // as __builtin_alloca is. By deleting/commenting out the include of the missing
+        // "alloca.h" and replacing `alloca(...)` with `__builtin_alloca(...)` seems
+        // to work just fine. In my specific application, i don't need this tests
+        // at all. Because this doesn't compile, my project doesn't compile, so
+        // i won't make a pull request about this, I'll just use this fork for my
+        // application, looking forward to the implications doing this might
+        // make my project fall into.
+        // Also... man, just for one `alloca(3)` call... Makes out no sense to me.
+        // But this is made by "a true programmer that know what it does", me...
+        // I don't, I'm just cheating around. XD
+	uint8_t* a_buffer = __builtin_alloca((a_length + 1) * sizeof(uint8_t));
 	xml_string_copy(a, a_buffer, a_length);
 	a_buffer[a_length] = 0;
 
